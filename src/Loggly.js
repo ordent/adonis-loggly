@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 /**
  * dimer-server
@@ -7,11 +7,11 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
-*/
+ */
 
-const Winston = require('winston')
-const _ = require('lodash')
-require('winston-loggly-bulk')
+const Winston = require("winston");
+const _ = require("lodash");
+var Logger = require("winston-loggly-bulk");
 
 /**
  * Reports logs to loggly
@@ -19,14 +19,18 @@ require('winston-loggly-bulk')
  * @class Loggly
  */
 class Loggly {
-  setConfig (config) {
-    this.config = Object.assign({}, {
-      name: 'adonis-app',
-      level: 'info',
-      json: 'true',
-      stripColors: true,
-      timestamp: new Date().toLocaleTimeString()
-    }, config)
+  setConfig(config) {
+    this.config = Object.assign(
+      {},
+      {
+        name: "adonis-app",
+        level: "info",
+        json: "true",
+        stripColors: true,
+        timestamp: new Date().toLocaleTimeString(),
+      },
+      config
+    );
 
     /**
      * Loggly returns 400 when tags are defined to an empty
@@ -34,14 +38,17 @@ class Loggly {
      * an empty array
      */
     if (this.config.tags && this.config.tags.length === 0) {
-      delete this.config.tags
+      delete this.config.tags;
     }
+    this.logger = Winston.createLogger({
+      transports: [Winston.add(new Logger.Loggly(this.config))],
+    });
+    // console.log(Winston.transports)
+    // this.logger = new Winston.Logger({
+    //   transports: [new Winston.transports.Loggly(this.config)]
+    // })
 
-    this.logger = new Winston.Logger({
-      transports: [new Winston.transports.Loggly(this.config)]
-    })
-
-    this.logger.setLevels(this.levels)
+    this.logger.setLevels(this.levels);
   }
 
   /**
@@ -51,7 +58,7 @@ class Loggly {
    *
    * @return {Object}
    */
-  get levels () {
+  get levels() {
     return {
       emerg: 0,
       alert: 1,
@@ -60,8 +67,8 @@ class Loggly {
       warning: 4,
       notice: 5,
       info: 6,
-      debug: 7
-    }
+      debug: 7,
+    };
   }
 
   /**
@@ -71,8 +78,8 @@ class Loggly {
    *
    * @return {String}
    */
-  get level () {
-    return this.logger.transports[this.config.name].level
+  get level() {
+    return this.logger.transports[this.config.name].level;
   }
 
   /**
@@ -82,8 +89,8 @@ class Loggly {
    *
    * @return {void}
    */
-  set level (level) {
-    this.logger.transports[this.config.name].level = level
+  set level(level) {
+    this.logger.transports[this.config.name].level = level;
   }
 
   /**
@@ -97,10 +104,10 @@ class Loggly {
    *
    * @return {void}
    */
-  log (level, msg, ...meta) {
-    const levelName = _.findKey(this.levels, (num) => num === level)
-    this.logger.log(levelName, msg, ...meta)
+  log(level, msg, ...meta) {
+    const levelName = _.findKey(this.levels, (num) => num === level);
+    this.logger.log(levelName, msg, ...meta);
   }
 }
 
-module.exports = Loggly
+module.exports = Loggly;
